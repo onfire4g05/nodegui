@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-13
+          - os: macos-13-arm64
             platform: darwin
             arch: arm64
     runs-on: ${{ matrix.os }}
@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '18.12.1'
+          architecture: ${{ matrix.arch }}
 
       - name: Install ubuntu deps
         if: contains(matrix.platform, 'linux')
