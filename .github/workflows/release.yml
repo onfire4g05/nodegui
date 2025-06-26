@@ -1,24 +1,16 @@
-name: Build and Deploy to npm
+name: Build for arm
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   precompile:
-    if: contains(github.event.release.tag_name, 'v0.0.0-latest-master') == false
     strategy:
       matrix:
         include:
-          - os: ubuntu-22.04
-            platform: linux
-            arch: x64
-          - os: windows-latest
-            platform: win32
-            arch: x64
           - os: macos-13
             platform: darwin
-            arch: x64
+            arch: arm64
     runs-on: ${{ matrix.os }}
     env:
       ARCHIVE_FILENAME: nodegui-binary-${{github.event.release.tag_name}}-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz
@@ -69,28 +61,3 @@ jobs:
         with:
           name: ${{ env.ARCHIVE_FILENAME }}
           path: ${{ env.ARCHIVE_FILENAME }}
-
-      - name: Upload release binaries
-        run: |
-            gh release upload "${{github.event.release.tag_name}}" ${{ env.ARCHIVE_FILENAME }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-  publish-npm-package:
-    needs: precompile
-    if: contains(github.event.release.tag_name, 'v0.0.0-latest-master') == false
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18.12.1'
-      - name: Install ubuntu deps
-        run: sudo apt update
-      - run: sudo apt install mesa-common-dev libglu1-mesa-dev
-      - run: npm install
-      - run: echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> .npmrc
-      - run: npm publish --access=public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
-          CMAKE_BUILD_PARALLEL_LEVEL: 8
