@@ -19,8 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          architecture: ${{ matrix.arch }}
+          node-version: '18.12.1'
 
       - name: Install ubuntu deps
         if: contains(matrix.platform, 'linux')
